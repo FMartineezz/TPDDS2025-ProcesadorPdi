@@ -46,11 +46,11 @@ public class Fachada implements FachadaProcesadorPdI {
         //Si ya existe lo convierte a dto y devuelve el ya existente, sino procesa el PdI nuevo y devuelve ese
         return yaExistente.map(this::convertirADto).orElseGet(() -> procesarNuveoPdI(pdIDTO));
         /*if (yaExistente.isPresent()) {
-            // ✅ Contador para PDI reusados
+            // Contador para PDI reusados
             meterRegistry.counter("dds.pdi.procesar", "status", "reused").increment();
             return convertirADto(yaExistente.get());
         } else {
-            // ✅ Contador para PDI nuevos
+            // Contador para PDI nuevos
             meterRegistry.counter("dds.pdi.procesar", "status", "new").increment();
             return procesarNuveoPdI(pdIDTO);
         }*/
@@ -92,7 +92,7 @@ public class Fachada implements FachadaProcesadorPdI {
     }
 
     private PdIDTO procesarNuveoPdI(PdIDTO entrada){
-        fachadaSolicitudes.estaActivo(entrada.hechoId()); // Si esta línea no lanza una excepción expresada en el Proxy, el hecho está activo
+        //fachadaSolicitudes.estaActivo(entrada.hechoId()); // Si esta línea no lanza una excepción expresada en el Proxy, el hecho está activo
         ProcesadorPdI procesador = new ProcesadorPdI();
         PdI dominio = convertirADomino(entrada);
         PdI PdIprocesado = procesador.procesar(dominio);
