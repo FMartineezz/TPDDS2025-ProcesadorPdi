@@ -135,6 +135,10 @@
       </exclusions>
     </dependency>
 
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-registry-datadog</artifactId>
+    </dependency>
   </dependencies>
 
   <build>

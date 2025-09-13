@@ -26,40 +26,15 @@ public class Fachada implements FachadaProcesadorPdI {
     private MeterRegistry meterRegistry;
 
     @Autowired
-    public Fachada(PdIRepository pdIRepository, FachadaSolicitudes fachadaSolicitudes) {
+    public Fachada(PdIRepository pdIRepository, FachadaSolicitudes fachadaSolicitudes, MeterRegistry meterRegistry) {
         this.Repository= pdIRepository;
         this.fachadaSolicitudes = fachadaSolicitudes;
         this.meterRegistry = meterRegistry;
     }
 
     @Override
-    /*public PdIDTO procesar(PdIDTO pdIDTO) {
-        try {
-            // Validación con solicitudes
-            ValidacionFachadaSolicitudes(pdIDTO);
-
-            // Si ya existe
-            Optional<PdI> yaExistente = Repository.findByHechoId(pdIDTO.hechoId())
-                    .stream()
-                    .filter(p -> sonIgualesSinId(p, convertirADomino(pdIDTO)))
-                    .findFirst();
-
-            if (yaExistente.isPresent()) {
-                meterRegistry.counter("dds.pdi.procesar", "status", "reused").increment();
-                return convertirADto(yaExistente.get());
-            }
-
-            // Nuevo
-            PdIDTO procesado = procesarNuveoPdI(pdIDTO);
-            meterRegistry.counter("dds.pdi.procesar", "status", "new").increment();
-            return procesado;
-
-        } catch (IllegalStateException e) {
-            meterRegistry.counter("dds.pdi.procesar", "status", "error").increment();
-            throw e;
-        }
-    }*/
-    public PdIDTO procesar(PdIDTO pdIDTO) throws IllegalStateException {
+    public PdIDTO procesar(PdIDTO pdIDTO) {
+        try{
         ValidacionFachadaSolicitudes(pdIDTO);
         PdI pdI = convertirADomino(pdIDTO);
 
@@ -70,16 +45,21 @@ public class Fachada implements FachadaProcesadorPdI {
                 .findFirst();
 
         //Si ya existe lo convierte a dto y devuelve el ya existente, sino procesa el PdI nuevo y devuelve ese
-        return yaExistente.map(this::convertirADto).orElseGet(() -> procesarNuveoPdI(pdIDTO));
-        /*if (yaExistente.isPresent()) {
-            // Contador para PDI reusados
-            meterRegistry.counter("dds.pdi.procesar", "status", "reused").increment();
-            return convertirADto(yaExistente.get());
-        } else {
-            // Contador para PDI nuevos
-            meterRegistry.counter("dds.pdi.procesar", "status", "new").increment();
-            return procesarNuveoPdI(pdIDTO);
-        }*/
+       // return yaExistente.map(this::convertirADto).orElseGet(() -> procesarNuveoPdI(pdIDTO));
+            return yaExistente.map(p -> {
+                meterRegistry.counter("dds.pdi.procesar", "status", "reused").increment();
+                return convertirADto(p);
+            }).orElseGet(() -> {
+                // Si no existe → proceso uno nuevo y marco la métrica como new
+                PdIDTO nuevo = procesarNuveoPdI(pdIDTO);
+                meterRegistry.counter("dds.pdi.procesar", "status", "new").increment();
+                return nuevo;
+            });
+        } catch (Exception e) {
+            meterRegistry.counter("dds.pdi.procesar", "status", "error").increment();
+            throw e;
+        }
+
     }
 
     @Override
