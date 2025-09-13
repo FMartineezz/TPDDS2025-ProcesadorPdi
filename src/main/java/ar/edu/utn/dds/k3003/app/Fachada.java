@@ -33,7 +33,7 @@ public class Fachada implements FachadaProcesadorPdI {
     }
 
     @Override
-    public PdIDTO procesar(PdIDTO pdIDTO) {
+    /*public PdIDTO procesar(PdIDTO pdIDTO) {
         try {
             // Validación con solicitudes
             ValidacionFachadaSolicitudes(pdIDTO);
@@ -58,8 +58,8 @@ public class Fachada implements FachadaProcesadorPdI {
             meterRegistry.counter("dds.pdi.procesar", "status", "error").increment();
             throw e;
         }
-    }
-   /* public PdIDTO procesar(PdIDTO pdIDTO) throws IllegalStateException {
+    }*/
+    public PdIDTO procesar(PdIDTO pdIDTO) throws IllegalStateException {
         ValidacionFachadaSolicitudes(pdIDTO);
         PdI pdI = convertirADomino(pdIDTO);
 
@@ -79,8 +79,8 @@ public class Fachada implements FachadaProcesadorPdI {
             // Contador para PDI nuevos
             meterRegistry.counter("dds.pdi.procesar", "status", "new").increment();
             return procesarNuveoPdI(pdIDTO);
-        }
-    }*/
+        }*/
+    }
 
     @Override
     public PdIDTO buscarPdIPorId(String pdiId) throws NoSuchElementException {
@@ -112,13 +112,13 @@ public class Fachada implements FachadaProcesadorPdI {
         if (this.fachadaSolicitudes == null) {
             throw new IllegalStateException("FachadaSolicitudes no fue inyectada");
         }
-        if (!this.fachadaSolicitudes.estaActivo(entrada.id())) {
+        if (!this.fachadaSolicitudes.estaActivo(entrada.hechoId())) {
             throw new IllegalStateException("La solicitud no está activa");
         }
     }
 
     private PdIDTO procesarNuveoPdI(PdIDTO entrada){
-        //fachadaSolicitudes.estaActivo(entrada.hechoId()); // Si esta línea no lanza una excepción expresada en el Proxy, el hecho está activo
+        fachadaSolicitudes.estaActivo(entrada.hechoId()); // Si esta línea no lanza una excepción expresada en el Proxy, el hecho está activo
         ProcesadorPdI procesador = new ProcesadorPdI();
         PdI dominio = convertirADomino(entrada);
         PdI PdIprocesado = procesador.procesar(dominio);
