@@ -33,7 +33,33 @@ public class Fachada implements FachadaProcesadorPdI {
     }
 
     @Override
-    public PdIDTO procesar(PdIDTO pdIDTO) throws IllegalStateException {
+    public PdIDTO procesar(PdIDTO pdIDTO) {
+        try {
+            // Validación con solicitudes
+            ValidacionFachadaSolicitudes(pdIDTO);
+
+            // Si ya existe
+            Optional<PdI> yaExistente = Repository.findByHechoId(pdIDTO.hechoId())
+                    .stream()
+                    .filter(p -> sonIgualesSinId(p, convertirADomino(pdIDTO)))
+                    .findFirst();
+
+            if (yaExistente.isPresent()) {
+                meterRegistry.counter("dds.pdi.procesar", "status", "reused").increment();
+                return convertirADto(yaExistente.get());
+            }
+
+            // Nuevo
+            PdIDTO procesado = procesarNuveoPdI(pdIDTO);
+            meterRegistry.counter("dds.pdi.procesar", "status", "new").increment();
+            return procesado;
+
+        } catch (IllegalStateException e) {
+            meterRegistry.counter("dds.pdi.procesar", "status", "error").increment();
+            throw e;
+        }
+    }
+   /* public PdIDTO procesar(PdIDTO pdIDTO) throws IllegalStateException {
         ValidacionFachadaSolicitudes(pdIDTO);
         PdI pdI = convertirADomino(pdIDTO);
 
@@ -53,8 +79,8 @@ public class Fachada implements FachadaProcesadorPdI {
             // Contador para PDI nuevos
             meterRegistry.counter("dds.pdi.procesar", "status", "new").increment();
             return procesarNuveoPdI(pdIDTO);
-        }*/
-    }
+        }
+    }*/
 
     @Override
     public PdIDTO buscarPdIPorId(String pdiId) throws NoSuchElementException {

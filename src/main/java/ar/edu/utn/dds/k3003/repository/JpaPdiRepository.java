@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-@Profile("deploy")
+@Profile({"deploy","h2"})
 public interface JpaPdiRepository extends JpaRepository<PdI, Long>, PdIRepository {
     List<PdI> findByHechoId(String hechoId);
 }
