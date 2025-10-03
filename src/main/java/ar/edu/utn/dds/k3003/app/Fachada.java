@@ -24,12 +24,17 @@ public class Fachada implements FachadaProcesadorPdI {
     private PdIRepository Repository;
     private FachadaSolicitudes fachadaSolicitudes;
     private MeterRegistry meterRegistry;
+    private ar.edu.utn.dds.k3003.model.ProcesadorPdI procesador;
 
     @Autowired
-    public Fachada(PdIRepository pdIRepository, FachadaSolicitudes fachadaSolicitudes, MeterRegistry meterRegistry) {
+    public Fachada(PdIRepository pdIRepository,
+                   FachadaSolicitudes fachadaSolicitudes,
+                   MeterRegistry meterRegistry,
+                   ar.edu.utn.dds.k3003.model.ProcesadorPdI procesador) {
         this.Repository= pdIRepository;
         this.fachadaSolicitudes = fachadaSolicitudes;
         this.meterRegistry = meterRegistry;
+        this.procesador = procesador;
     }
 
     @Override
@@ -99,9 +104,9 @@ public class Fachada implements FachadaProcesadorPdI {
 
     private PdIDTO procesarNuveoPdI(PdIDTO entrada){
         fachadaSolicitudes.estaActivo(entrada.hechoId()); // Si esta línea no lanza una excepción expresada en el Proxy, el hecho está activo
-        ProcesadorPdI procesador = new ProcesadorPdI();
+        //ProcesadorPdI procesador = new ProcesadorPdI();
         PdI dominio = convertirADomino(entrada);
-        PdI PdIprocesado = procesador.procesar(dominio);
+        PdI PdIprocesado = this.procesador.procesar(dominio);
         this.Repository.save(PdIprocesado);
         return convertirADto(PdIprocesado);
     }
@@ -115,15 +120,54 @@ public class Fachada implements FachadaProcesadorPdI {
     }
 
 //Metodos privados para omision de logica repetida
-    private PdIDTO convertirADto(PdI pdi){
+   /* private PdIDTO convertirADto(PdI pdi){
         return new PdIDTO(String.valueOf(pdi.getId()), pdi.getHechoId(), pdi.getDescripcion(),
                 pdi.getLugar(), pdi.getMomento(),pdi.getContenido(),pdi.getEtiquetas());
-    }
-
-    private PdI convertirADomino(PdIDTO pdiDTO){
+    }*/
+    private PdIDTO convertirADto(PdI pdi){
+               return new PdIDTO(
+                                String.valueOf(pdi.getId()),
+                                pdi.getHechoId(),
+                                pdi.getDescripcion(),
+                                pdi.getLugar(),
+                                pdi.getMomento(),
+                                pdi.getContenido(),
+                                pdi.getEtiquetas(),
+                                pdi.getResultadoOcr(),
+                                pdi.getUrlImagen()
+                        );
+         }
+    /*private PdI convertirADomino(PdIDTO pdiDTO){
         return new PdI(Long.parseLong(pdiDTO.id()),pdiDTO.hechoId(), pdiDTO.descripcion(),
                 pdiDTO.lugar(), pdiDTO.momento(),pdiDTO.contenido(),
                 new ArrayList<>(pdiDTO.etiquetas()));
+    }*/
+    private PdI convertirADomino(PdIDTO pdiDTO) {
+        boolean tieneId = pdiDTO.id() != null && !pdiDTO.id().isBlank();
+        if (tieneId) {
+            return new PdI(
+                    Long.parseLong(pdiDTO.id()),
+                    pdiDTO.hechoId(),
+                    pdiDTO.descripcion(),
+                    pdiDTO.lugar(),
+                    pdiDTO.momento(),
+                    pdiDTO.contenido(),
+                    new ArrayList<>(pdiDTO.etiquetas()),
+                    pdiDTO.resultadoOcr(),
+                    pdiDTO.urlImagen()
+            );
+        } else {
+            return new PdI(
+                    pdiDTO.hechoId(),
+                    pdiDTO.descripcion(),
+                    pdiDTO.lugar(),
+                    pdiDTO.momento(),
+                    pdiDTO.contenido(),
+                    new ArrayList<>(pdiDTO.etiquetas()),
+                    pdiDTO.resultadoOcr(),
+                    pdiDTO.urlImagen()
+            );
+        }
     }
 
     @Override
