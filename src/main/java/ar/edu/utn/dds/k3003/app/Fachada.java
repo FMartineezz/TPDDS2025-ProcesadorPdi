@@ -1,21 +1,25 @@
 package ar.edu.utn.dds.k3003.app;
 
+import ar.edu.utn.dds.k3003.clients.SearchProxy;
 import ar.edu.utn.dds.k3003.facades.FachadaProcesadorPdI;
 import ar.edu.utn.dds.k3003.repository.InMemoryPdIRepo;
 import ar.edu.utn.dds.k3003.model.PdI;
-import ar.edu.utn.dds.k3003.model.ProcesadorPdI;
+import lombok.extern.slf4j.Slf4j;
 import ar.edu.utn.dds.k3003.facades.FachadaSolicitudes;
 import ar.edu.utn.dds.k3003.facades.dtos.PdIDTO;
 import ar.edu.utn.dds.k3003.repository.PdIRepository;
 import lombok.Setter;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import io.micrometer.core.instrument.MeterRegistry;
 
+import java.net.URI;
 import java.util.*;
 
+@Slf4j
 @Service
 @Transactional
 public class Fachada implements FachadaProcesadorPdI {
@@ -25,16 +29,19 @@ public class Fachada implements FachadaProcesadorPdI {
     private FachadaSolicitudes fachadaSolicitudes;
     private MeterRegistry meterRegistry;
     private ar.edu.utn.dds.k3003.model.ProcesadorPdI procesador;
+    private SearchProxy searchProxy;
 
     @Autowired
     public Fachada(PdIRepository pdIRepository,
                    FachadaSolicitudes fachadaSolicitudes,
                    MeterRegistry meterRegistry,
-                   ar.edu.utn.dds.k3003.model.ProcesadorPdI procesador) {
+                   ar.edu.utn.dds.k3003.model.ProcesadorPdI procesador,
+                   SearchProxy searchProxy) {
         this.Repository= pdIRepository;
         this.fachadaSolicitudes = fachadaSolicitudes;
         this.meterRegistry = meterRegistry;
         this.procesador = procesador;
+        this.searchProxy = searchProxy;
     }
 
     @Override
@@ -53,13 +60,16 @@ public class Fachada implements FachadaProcesadorPdI {
        // return yaExistente.map(this::convertirADto).orElseGet(() -> procesarNuveoPdI(pdIDTO));
             return yaExistente.map(p -> {
                 meterRegistry.counter("dds.pdi.procesar", "status", "reused").increment();
+                indexarEnBuscador(convertirADto(p));
                 return convertirADto(p);
             }).orElseGet(() -> {
                 // Si no existe → proceso uno nuevo y marco la métrica como new
                 PdIDTO nuevo = procesarNuveoPdI(pdIDTO);
                 meterRegistry.counter("dds.pdi.procesar", "status", "new").increment();
+                indexarEnBuscador(nuevo);
                 return nuevo;
             });
+
         } catch (Exception e) {
             meterRegistry.counter("dds.pdi.procesar", "status", "error").increment();
             throw e;
@@ -173,6 +183,16 @@ public class Fachada implements FachadaProcesadorPdI {
     @Override
     public void eliminarTodos() {
         Repository.deleteAll();
+    }
+
+
+    private void indexarEnBuscador(PdIDTO pdi) {
+        try {
+            searchProxy.indexPdi(pdi);
+        } catch (Exception ex) {
+             log.warn("No se pudo indexar PDI {} en buscador", pdi.id(), ex);
+
+        }
     }
 
 }

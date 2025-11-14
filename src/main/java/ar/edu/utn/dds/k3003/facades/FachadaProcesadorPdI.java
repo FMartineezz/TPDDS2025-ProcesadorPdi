@@ -2,6 +2,7 @@
 
 
                                                                                                                                                                                                                                                                 import ar.edu.utn.dds.k3003.facades.dtos.PdIDTO;
+                                                                                                                                                                                                                                                                import ar.edu.utn.dds.k3003.model.PdI;
 
                                                                                                                                                                                                                                                                 import java.util.List;
                                                                                                                                                                                                                                                                 import java.util.NoSuchElementException;
@@ -16,4 +17,8 @@
                                                                                                                                                                                                                                                                     void setFachadaSolicitudes(FachadaSolicitudes var1);
 
                                                                                                                                                                                                                                                                     void eliminarTodos();
+
+                                                                                                                                                                                                                                                                    //void indexarEnBuscador(PdIDTO var1)
+
+
                                                                                                                                                                                                                                                                 }

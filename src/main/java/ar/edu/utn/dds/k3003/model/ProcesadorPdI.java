@@ -32,15 +32,6 @@ public class ProcesadorPdI {
             analyzer.apply(pdi);
         }
 
-        // Back-compat: si no hubo analizadores o no setearon nada, mantené el comportamiento anterior
-        /*boolean sinResultados =
-                (pdi.getResultadoOcr() == null || pdi.getResultadoOcr().isBlank()) &&
-                        (pdi.getEtiquetas() == null || pdi.getEtiquetas().isEmpty());
-
-        if (sinResultados) {
-            pdi.agregarEtiqueta();
-        }*/
-
         return pdi;
     }
 }
