@@ -162,17 +162,6 @@
   </dependencies>
 
   <build>
-      <resources>
-          <resource>
-              <directory>src/main/resources</directory>
-              <!-- Si usás ${...} en otros .properties, dejá filtering en true -->
-              <filtering>true</filtering>
-              <excludes>
-                  <!-- Este archivo NO se filtra (se copia tal cual) -->
-                  <exclude>application-deploy.properties</exclude>
-              </excludes>
-          </resource>
-      </resources>
 
     <plugins>
       <plugin>
@@ -187,15 +176,7 @@
           </excludes>
         </configuration>
       </plugin>
-        <!-- Encoding explícito para resources -->
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-resources-plugin</artifactId>
-            <version>3.3.1</version>
-            <configuration>
-                <encoding>UTF-8</encoding>
-            </configuration>
-        </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
