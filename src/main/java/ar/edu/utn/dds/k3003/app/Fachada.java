@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 
 import java.net.URI;
 import java.util.*;
@@ -30,6 +31,7 @@ public class Fachada implements FachadaProcesadorPdI {
     private MeterRegistry meterRegistry;
     private ar.edu.utn.dds.k3003.model.ProcesadorPdI procesador;
     private SearchProxy searchProxy;
+    private final Timer pdiProcessTimer;
 
     @Autowired
     public Fachada(PdIRepository pdIRepository,
@@ -42,10 +44,12 @@ public class Fachada implements FachadaProcesadorPdI {
         this.meterRegistry = meterRegistry;
         this.procesador = procesador;
         this.searchProxy = searchProxy;
+        this.pdiProcessTimer = meterRegistry.timer("dds.pdi.procesar.tiempo");
     }
 
     @Override
     public PdIDTO procesar(PdIDTO pdIDTO) {
+        return pdiProcessTimer.record(() -> {
         try{
         ValidacionFachadaSolicitudes(pdIDTO);
         PdI pdI = convertirADomino(pdIDTO);
@@ -74,7 +78,7 @@ public class Fachada implements FachadaProcesadorPdI {
             meterRegistry.counter("dds.pdi.procesar", "status", "error").increment();
             throw e;
         }
-
+        });
     }
 
     @Override
