@@ -19,7 +19,7 @@ public class SearchProxy {
     public SearchProxy(ObjectMapper objectMapper) {
         // URL del SearchService (variable de entorno)
         var env = System.getenv();
-        this.endpoint = env.getOrDefault("URL_BUSQUEDA", "http://localhost:8082");
+        this.endpoint = env.getOrDefault("URL_BUSQUEDA", "https://busquedaservice.onrender.com");
 
         var retrofit = new Retrofit.Builder()
                 .baseUrl(endpoint.endsWith("/") ? endpoint : endpoint + "/")
