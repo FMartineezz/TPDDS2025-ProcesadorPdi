@@ -60,11 +60,14 @@ public class PdiWorker {
 
     @PostConstruct
     public void start() throws Exception {
-        String instance = System.getenv().getOrDefault("PROCESADOR_ID", UUID.randomUUID().toString());
-        String queue = qPrefix + instance + ".pdi.procesar" + qSuffix;
+
+        String instance = System.getenv().getOrDefault("PROCESADOR_ID", "default");
+
+        String queue = qPrefix + "pdi.procesar" + qSuffix;
+
         declareQueueAndBind(queue, rkProcesar);
         startConsumer(queue);
-        log.info("[mq] worker iniciado queue='{}' rk='{}'", queue, rkProcesar);
+        log.info("[mq] worker '{}' iniciado queue='{}' rk='{}'", instance, queue, rkProcesar);
     }
 
     private void declareQueueAndBind(String queue, String topic) throws IOException {
