@@ -83,11 +83,14 @@ public class PdiController {
 
                 publisher.publicar(evento);
 
-                return ResponseEntity.accepted().body(Map.of(
+                /*return ResponseEntity.accepted().body(Map.of(
                         "status", "enqueued",
                         "messageId", messageId,
                         "hechoId", pdi.hechoId()
-                ));
+                ));*/
+                return ResponseEntity
+                        .accepted()
+                        .body(pdi);
             }
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
