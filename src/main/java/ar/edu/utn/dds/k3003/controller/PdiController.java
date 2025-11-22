@@ -47,7 +47,7 @@ public class PdiController {
 
     @PostMapping
     public ResponseEntity<?> crearPdi(@RequestBody PdIDTO pdi,
-                                      @RequestParam(name = "async", defaultValue = "false") boolean async) {
+                                      @RequestParam(name = "async", defaultValue = "true") boolean async) {
         try {
             if (!async) {
                 // ----- MODO SÍNCRONO -----
